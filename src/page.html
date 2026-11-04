@@ -1,0 +1,201 @@
+<!-- Page body template. tools/build.mjs fills {{key}} (escaped) and {{{key}}} (HTML) from i18n/<lang>.json "page",
+     and {{@…}} from the build itself, then writes <lang>/index.html. Edit here, not in the generated pages. -->
+<header class="top">
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 28 28" width="34" height="34" aria-hidden="true"><rect x="2.5" y="4.5" width="23" height="19" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2.5 11.5h23M10.5 11.5v12M17.5 11.5v12M14 4.5v7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+    <div>
+      <h1>{{h1}}</h1>
+      <p class="sub" id="saveNote">{{saveNote}}</p>
+    </div>
+  </div>
+  <div class="tools">
+    <button type="button" class="btn" id="undoBtn" title="{{undoTip}}">{{undo}}</button>
+    <button type="button" class="btn" id="redoBtn" title="{{redoTip}}">{{redo}}</button>
+    <select class="btn" id="presetSel" aria-label="{{presetAria}}">
+      <option value="">{{presetPlaceholder}}</option>
+    </select>
+    <a class="btn" href="#ar">{{navAr}}</a>
+    <button type="button" class="btn" id="dataBtn">{{btnData}}</button>
+    <button type="button" class="btn danger" id="clearBtn">{{btnClear}}</button>
+    <select class="btn" id="langSel" aria-label="{{langLabel}}" data-env="web">{{@langOptions}}</select>
+  </div>
+</header>
+<noscript><p class="noscript">{{noscript}}</p></noscript>
+
+<main class="work">
+  <aside class="rail">
+    <section class="card" aria-labelledby="h-drawer">
+      <h2 id="h-drawer">{{drawerTitle}}</h2>
+      <div class="fields three">
+        <label class="fld"><span>{{drawerW}}</span><span class="num"><input id="inW" type="number" step="any" min="100" max="2400" inputmode="decimal"><em>mm</em></span></label>
+        <label class="fld"><span>{{drawerD}}</span><span class="num"><input id="inD" type="number" step="any" min="100" max="2400" inputmode="decimal"><em>mm</em></span></label>
+        <label class="fld"><span>{{drawerH}}</span><span class="num"><input id="inH" type="number" step="any" min="10" max="300" inputmode="decimal"><em>mm</em></span></label>
+      </div>
+      <p class="hint">{{drawerHint}}</p>
+      <div class="fields two">
+        <label class="fld"><span>{{drawerT}}</span><span class="num"><input id="inT" type="number" step="any" min="3" max="50" inputmode="decimal"><em>mm</em></span></label>
+        <label class="fld"><span>{{drawerSnap}}</span><span class="num"><select id="inSnap"><option value="0">{{drawerSnapOff}}</option><option value="1">1 mm</option><option value="5">5 mm</option><option value="10">10 mm</option></select></span></label>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="h-groups">
+      <div class="card-head"><h2 id="h-groups">{{groupsTitle}}</h2><span class="count" id="boardCount"></span></div>
+      <div class="add-row">
+        <button type="button" class="btn add" data-add="h"><span class="glyph h" aria-hidden="true"></span>{{addH}}</button>
+        <button type="button" class="btn add" data-add="v"><span class="glyph v" aria-hidden="true"></span>{{addV}}</button>
+      </div>
+      <p class="hint">{{groupsHint}}</p>
+      <div id="groups" class="groups"></div>
+    </section>
+  </aside>
+
+  <section class="stage" aria-label="{{stageAria}}">
+    <div class="stage-inner">
+      <div class="stage-bar">
+        <div class="chips" role="group" aria-label="{{chipsAria}}">
+          <button type="button" class="chip" data-view="dims">{{chipDims}}</button>
+          <button type="button" class="chip" data-view="parts">{{chipParts}}</button>
+          <button type="button" class="chip" data-view="joints">{{chipJoints}}</button>
+        </div>
+        <div class="ctx" id="ctx"></div>
+      </div>
+      <div class="canvas-wrap" id="wrap">
+        <svg id="svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{{svgAria}}"><g id="scene"></g></svg>
+      </div>
+      <div class="stage-foot" id="summary"></div>
+    </div>
+  </section>
+</main>
+
+<section class="lower">
+  <div class="card" aria-labelledby="h-cut">
+    <div class="card-head">
+      <h2 id="h-cut">{{cutTitle}}</h2>
+      <div class="row">
+        <label class="fld gap-fld"><span>{{cutGap}}</span><span class="num"><input id="inGap" type="number" step="any" min="0" max="5" inputmode="decimal"><em>mm</em></span></label>
+        <button type="button" class="btn sm" id="copyCut" style="align-self:end">{{cutCopy}}</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="cut-table">
+        <thead><tr><th>{{thPart}}</th><th>{{thDir}}</th><th>{{thSize}}</th><th class="c">{{thQty}}</th><th>{{thProc}}</th></tr></thead>
+        <tbody id="cutBody"></tbody>
+        <tfoot><tr><td colspan="5" id="cutFoot"></td></tr></tfoot>
+      </table>
+    </div>
+    <ul class="notes" id="cutNotes"></ul>
+  </div>
+
+  <div class="side-col">
+    <div class="card" aria-labelledby="h-iss">
+      <div class="card-head"><h2 id="h-iss">{{issTitle}}</h2><span id="issCount"></span></div>
+      <ul id="issues"></ul>
+    </div>
+    <div class="card" aria-labelledby="h-stock">
+      <h2 id="h-stock">{{stockTitle}}</h2>
+      <div class="fields two">
+        <label class="fld"><span>{{stockLen}}</span><span class="num"><input id="inStock" type="number" step="any" min="200" max="6000" inputmode="decimal"><em>mm</em></span></label>
+        <label class="fld"><span>{{stockKerf}}</span><span class="num"><input id="inKerf" type="number" step="any" min="0" max="10" inputmode="decimal"><em>mm</em></span></label>
+      </div>
+      <div id="stock"></div>
+    </div>
+  </div>
+</section>
+
+<section class="card ar" id="ar" aria-labelledby="h-ar">
+  <div class="card-head">
+    <h2 id="h-ar">{{arTitle}}</h2>
+    <div class="seg" role="group" aria-label="{{arModeAria}}">
+      <button type="button" data-armode="3d" aria-pressed="true">{{ar3d}}</button>
+      <button type="button" data-armode="photo" aria-pressed="false">{{arPhoto}}</button>
+    </div>
+  </div>
+  <div class="ar-grid">
+    <div class="ar-stage" id="arStage">
+      <canvas id="arCanvas" aria-label="{{arCanvasAria}}"></canvas>
+      <div class="ar-empty" id="arEmpty" hidden>
+        <svg viewBox="0 0 48 48" width="44" height="44" aria-hidden="true"><path d="M8 16h7l3-5h12l3 5h7v22H8z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><circle cx="24" cy="26" r="7" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>
+        <p>{{arEmpty}}</p>
+        <label class="btn primary file-btn">{{arPick}}<input type="file" accept="image/*" data-arfile></label>
+      </div>
+    </div>
+    <div class="ar-side">
+      <div class="ar-ctl" id="ar3dCtl">
+        <p class="hint">{{ar3dHint}}</p>
+        <label class="fld"><span>{{arPitch}}</span><input type="range" id="arPitch" min="15" max="88" value="50"></label>
+      </div>
+      <div class="ar-ctl" id="arPhotoCtl" hidden>
+        <ol class="steps">
+          <li>{{arStep1}}</li>
+          <li>{{arStep2}}</li>
+          <li>{{arStep3}}</li>
+        </ol>
+        <label class="btn file-btn" id="arFileBtn">{{arPick}}<input type="file" accept="image/*" data-arfile></label>
+        <label class="fld"><span>{{arAlpha}}</span><input type="range" id="arAlpha" min="30" max="100" value="92"></label>
+        <label class="check"><input type="checkbox" id="arOutline" checked> {{arOutline}}</label>
+        <button type="button" class="btn sm" id="arReset">{{arReset}}</button>
+        <p class="hint">{{arPrivacy}}</p>
+      </div>
+      <div class="ar-export">
+        <h3>{{arLiveTitle}}</h3>
+        <p class="hint" id="arLiveNote">{{arLiveNote}}</p>
+        <div class="row">
+          <button type="button" class="btn primary" id="arLiveBtn" hidden>{{arLiveBtn}}</button>
+          <button type="button" class="btn primary" id="arModelBtn" disabled>{{arModelBtn}}</button>
+          <button type="button" class="btn" id="arShotBtn" disabled>{{arShotBtn}}</button>
+        </div>
+        <p class="hint" id="arDlNote">{{arDlChecking}}</p>
+        <details>
+          <summary>{{arHowto}}</summary>
+          <p data-env="web" hidden>{{{arHowAndroid}}}</p>
+          <p data-env="web" hidden>{{{arHowIos}}}</p>
+          <p data-env="web" hidden>{{{arHowFiles}}}</p>
+          <p data-env="claude">{{{arHowIosClaude}}}</p>
+          <p data-env="claude">{{{arHowAndroidClaude}}}</p>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="card about" aria-labelledby="h-about">
+  <h2 id="h-about">{{aboutTitle}}</h2>
+  <p>{{aboutIntro}}</p>
+  <ul class="about-list">
+    <li>{{{aboutF1}}}</li>
+    <li>{{{aboutF2}}}</li>
+    <li>{{{aboutF3}}}</li>
+    <li>{{{aboutF4}}}</li>
+    <li>{{{aboutF5}}}</li>
+  </ul>
+  <p class="hint">{{aboutPrivacy}}</p>
+</section>
+
+<footer class="foot" data-env="web">
+  <nav class="lang-nav" aria-label="{{langLabel}}">{{@langLinks}}</nav>
+  {{@repoLink}}
+</footer>
+
+<div class="overlay" id="dlg" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+    <h2 id="dlgTitle"></h2>
+    <p class="hint" id="dlgHint"></p>
+    <textarea id="dlgText" spellcheck="false" aria-label="{{dlgTextAria}}"></textarea>
+    <p class="dlg-msg" id="dlgMsg"></p>
+    <div class="row end">
+      <button type="button" class="btn" id="dlgCopy">{{dlgCopy}}</button>
+      <button type="button" class="btn primary" id="dlgImport">{{dlgImport}}</button>
+      <button type="button" class="btn" id="dlgClose">{{dlgClose}}</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<div class="xr-overlay" id="xrOverlay" hidden>
+  <p class="xr-hint" id="xrHint" role="status"></p>
+  <div class="xr-bar" id="xrBar">
+    <button type="button" class="btn" id="xrRotL" aria-label="{{xrRotL}}" hidden>↺ 1°</button>
+    <button type="button" class="btn" id="xrRotR" aria-label="{{xrRotR}}" hidden>↻ 1°</button>
+    <button type="button" class="btn" id="xrAgain" hidden>{{xrAgain}}</button>
+    <button type="button" class="btn primary" id="xrExit">{{xrExit}}</button>
+  </div>
+</div>
