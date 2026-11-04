@@ -4,6 +4,8 @@
 
 *Plan wooden cutlery drawer dividers in the browser — cut list, stock layout, 3D and AR preview. Available in 12 languages.*
 
+Try it: <https://drawer.everburstsun.net/>
+
 ## 功能
 
 - 拖动布置横、竖隔板，调整长度、数量、板厚和位置。等分范围可以从相邻的隔板量起。
