@@ -85,7 +85,6 @@
     "aboutF4": "<b>3D と写真プレビュー</b>3D モデルを回したり、引き出しの写真に仕切りを遠近つきで重ねたりできます。",
     "aboutF5": "<b>スマホで AR</b>Android の Chrome または iPhone の Safari で、実寸の仕切りをカメラ越しに開けた引き出しへ置けます。",
     "aboutPrivacy": "設計と写真はあなたのブラウザー内だけに保存され、アップロードされません。",
-    "repoLink": "GitHub でソースコードを見る",
     "dlgTextAria": "設計テキスト",
     "dlgCopy": "コピー",
     "dlgImport": "このテキストを読み込む",

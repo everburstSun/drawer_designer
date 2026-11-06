@@ -85,7 +85,6 @@
     "aboutF4": "<b>3D와 사진 미리보기</b>3D 모델을 돌려 보거나, 서랍 사진 위에 칸막이를 원근에 맞춰 겹쳐 볼 수 있습니다.",
     "aboutF5": "<b>휴대폰 AR</b>Android Chrome이나 iPhone Safari에서 카메라로 실제 크기의 칸막이를 열린 서랍에 놓아 봅니다.",
     "aboutPrivacy": "설계와 사진은 내 브라우저에만 저장되며 업로드되지 않습니다.",
-    "repoLink": "GitHub에서 소스 코드 보기",
     "dlgTextAria": "설계 텍스트",
     "dlgCopy": "복사",
     "dlgImport": "이 텍스트 가져오기",

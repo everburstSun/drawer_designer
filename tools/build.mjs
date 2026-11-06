@@ -16,6 +16,8 @@ const SOURCE = 'zh';      // the reference translation every other file is check
 const DEFAULT = 'en';     // where the root page sends browsers whose language is not offered
 const SCRIPTS = ['i18n', 'model', 'ar-math', 'drawing', 'panels', 'events', 'preview', 'live-ar', 'main'];
 const LANG_KEY = 'drawer-divider-planner/lang';
+const AUTHOR = 'Simon Sun', YEAR = 2026;
+const COPYRIGHT = `© ${YEAR} ${AUTHOR}`;
 
 // title and body fonts per script; Latin and Cyrillic pages share one set
 const SANS = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,system-ui,sans-serif';
@@ -36,7 +38,7 @@ const stripTags = s => s.replace(/<[^>]+>/g, '');
 const hash = p => createHash('sha1').update(readFileSync(join(ROOT, p))).digest('hex').slice(0, 8);
 const errors = [], warnings = [];
 
-// ---- site address and repository ----
+// ---- site address ----
 function gitRemote() {
   try {
     const r = execSync('git remote get-url origin', { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
@@ -48,7 +50,6 @@ const withSlash = u => (u.endsWith('/') ? u : u + '/');
 function site() {
   const cfg = existsSync(join(ROOT, 'site.json')) ? JSON.parse(read('site.json')) : {};
   const gh = gitRemote(), i = process.argv.indexOf('--url');
-  const repo = cfg.repo || (gh ? `https://github.com/${gh.user}/${gh.repo}` : '');
   let url = i > 0 ? process.argv[i + 1] : cfg.url;
   if (!url && existsSync(join(ROOT, 'CNAME'))) url = 'https://' + read('CNAME').trim();
   if (!url && gh) {
@@ -59,7 +60,7 @@ function site() {
     url = `https://USERNAME.github.io/${basename(ROOT)}/`;
     warnings.push(`no site address found; using ${url}. Set "url" in site.json (or add the GitHub remote) and build again.`);
   }
-  return { url: withSlash(url), repo, verify: cfg.verify || {} };
+  return { url: withSlash(url), verify: cfg.verify || {} };
 }
 
 // ---- translations ----
@@ -128,15 +129,14 @@ function langPage(S, all, code, tpl) {
   const d = all[code], url = `${S.url}${code}/`, F = FONTS[code] || FONTS.latin;
   const langOptions = LANGS.map(c => `<option value="${c}" lang="${all[c].lang.htmlLang}"${c === code ? ' selected' : ''}>${esc(all[c].lang.name)}</option>`).join('');
   const langLinks = LANGS.map(c => `<a href="../${c}/" hreflang="${all[c].lang.hreflang}" lang="${all[c].lang.htmlLang}" data-lang="${c}"${c === code ? ' aria-current="page"' : ''}>${esc(all[c].lang.name)}</a>`).join('');
-  const repoLink = S.repo ? `<p><a href="${esc(S.repo)}" rel="noopener">${esc(d.page.repoLink)}</a></p>` : '';
-  const body = fill(tpl.replace(/^<!--[\s\S]*?-->\n/, ''), d.page, { langOptions, langLinks, repoLink }, code);
+  const body = fill(tpl.replace(/^<!--[\s\S]*?-->\n/, ''), d.page, { langOptions, langLinks, copyright: esc(COPYRIGHT) }, code);
   const ld = {
     '@context': 'https://schema.org', '@type': 'WebApplication', name: d.page.h1, url, description: d.meta.description,
     inLanguage: d.lang.htmlLang, applicationCategory: 'DesignApplication', operatingSystem: 'Any',
     browserRequirements: d.meta.requirements, isAccessibleForFree: true, image: `${S.url}og/${code}.png`,
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
     featureList: ['aboutF1', 'aboutF2', 'aboutF3', 'aboutF4', 'aboutF5'].map(k => stripTags(d.page[k]).trim()),
-    ...(S.repo ? { sameAs: S.repo } : {}),
+    author: { '@type': 'Person', name: AUTHOR }, copyrightYear: YEAR,
   };
   return [
     '<!doctype html>',
@@ -147,6 +147,7 @@ function langPage(S, all, code, tpl) {
     '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">',
     `<title>${esc(d.meta.title)}</title>`,
     `<meta name="description" content="${esc(d.meta.description)}">`,
+    `<meta name="author" content="${esc(AUTHOR)}">`,
     ...verifyTags(S),
     `<link rel="canonical" href="${url}">`,
     ...alternates(S, all),
@@ -181,7 +182,8 @@ main{max-width:760px;margin:0 auto;background:var(--panel);border:1px solid var(
 h1{font-size:22px;margin:0 0 4px;display:flex;gap:10px;align-items:center}h1 svg{color:var(--accent);flex:none}
 p{margin:0 0 18px;color:var(--muted)}ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:8px}
 a{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:9px;color:var(--ink);text-decoration:none}a:hover{border-color:var(--accent)}
-a b{display:block}a span{font-size:12.5px;color:var(--muted)}`;
+a b{display:block}a span{font-size:12.5px;color:var(--muted)}
+footer{margin-top:14px;text-align:center;font-size:12.5px;color:var(--muted)}`;
 const MARK = '<svg viewBox="0 0 28 28" width="30" height="30" aria-hidden="true"><rect x="2.5" y="4.5" width="23" height="19" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2.5 11.5h23M10.5 11.5v12M17.5 11.5v12M14 4.5v7" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
 const langList = (all, prefix) => `<ul>${LANGS.map(c => `<li><a href="${prefix}${c}/" hreflang="${all[c].lang.hreflang}" lang="${all[c].lang.htmlLang}" dir="${all[c].lang.dir}" data-lang="${c}"><b>${esc(all[c].lang.name)}</b><span>${esc(all[c].page.h1)}</span></a></li>`).join('')}</ul>`;
 
@@ -217,6 +219,7 @@ ${[...verifyTags(S), `<link rel="canonical" href="${S.url}">`, ...alternates(S, 
 <p>${esc(d.meta.description)}</p>
 ${langList(all, '')}
 </main>
+<footer>${esc(COPYRIGHT)}</footer>
 </body>
 </html>
 `;
@@ -239,6 +242,7 @@ function notFoundPage(S, all) {
 <p>This page does not exist. Pick a language to open the designer.</p>
 ${langList(all, S.url)}
 </main>
+<footer>${esc(COPYRIGHT)}</footer>
 </body>
 </html>
 `;
